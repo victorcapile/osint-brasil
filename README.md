@@ -158,8 +158,10 @@ Gêneros: **Geopolítica**, **Negócios**, **Ciência**, **Esportes**, **Seguran
 
 Cada notícia recebe um **país** (código ISO alpha-2) quando o texto cita o país, um gentílico
 ou a capital. Notícias nacionais sem menção explícita são atribuídas ao Brasil. O mapa usa a
-base **Natural Earth 110m** (`public/geo/countries.geojson`) com projeção **Equal Earth**
-(equal-area) e pinta cada país conforme o volume de notícias.
+base **Natural Earth 110m** (`public/geo/countries.geojson`). No desktop, a projeção é
+**Equal Earth**; no mobile, um **azimutal de área igual centrado no Brasil** em formato
+quadrado, para dar mais área útil e legibilidade. Cada país é pintado conforme o volume de
+notícias.
 
 O mapa tem zoom (roda do mouse ou pinça), pan por arraste e botão de tela cheia — útil
 principalmente no mobile. Ao clicar em um país com notícias:

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { geoEqualEarth, geoPath } from "d3-geo";
+import { geoAzimuthalEqualArea, geoEqualEarth, geoPath } from "d3-geo";
 import { select } from "d3-selection";
 import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
 import {
@@ -22,9 +22,11 @@ interface CountryProperties {
   CONTINENT?: string;
 }
 
-const WIDTH = 960;
+const DESKTOP_WIDTH = 960;
 // Equal Earth tem proporção próxima de 2:1.
-const HEIGHT = 480;
+const DESKTOP_HEIGHT = 480;
+// No mobile, um disco equal-area centrado no Brasil ocupa muito melhor a tela.
+const MOBILE_SIZE = 620;
 const MAX_ZOOM = 10;
 const HEAT = ["#ece7dc", "#d8d1c4", "#bbb2a2", "#8c8374", "#575149", "#1d1b18"];
 
@@ -60,6 +62,14 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
   const [hovered, setHovered] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [expanded, setExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 639px)").matches,
+  );
+
+  const width = isMobile ? MOBILE_SIZE : DESKTOP_WIDTH;
+  const height = isMobile ? MOBILE_SIZE : DESKTOP_HEIGHT;
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const groupRef = useRef<SVGGElement | null>(null);
@@ -92,16 +102,34 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
     };
   }, []);
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   const paths = useMemo(() => {
     if (!data) return [];
 
-    const projection = geoEqualEarth().fitExtent(
-      [
-        [12, 12],
-        [WIDTH - 12, HEIGHT - 12],
-      ],
-      data,
-    );
+    const projection = isMobile
+      ? geoAzimuthalEqualArea()
+          .rotate([55, 10])
+          .fitExtent(
+            [
+              [12, 12],
+              [width - 12, height - 12],
+            ],
+            data,
+          )
+      : geoEqualEarth().fitExtent(
+          [
+            [12, 12],
+            [width - 12, height - 12],
+          ],
+          data,
+        );
     const path = geoPath(projection);
 
     return data.features.map((feature, index) => {
@@ -120,7 +148,7 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
         count,
       };
     });
-  }, [data, counts]);
+  }, [data, counts, isMobile]);
 
   useEffect(() => {
     if (!data || !svgRef.current || !groupRef.current) return;
@@ -134,11 +162,11 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
       .scaleExtent([1, MAX_ZOOM])
       .translateExtent([
         [0, 0],
-        [WIDTH, HEIGHT],
+        [width, height],
       ])
       .extent([
         [0, 0],
-        [WIDTH, HEIGHT],
+        [width, height],
       ])
       .on("zoom", (event) => {
         group.attr("transform", event.transform.toString());
@@ -152,7 +180,7 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
       svg.on(".zoom", null);
       zoomBehaviorRef.current = null;
     };
-  }, [data]);
+  }, [data, isMobile]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -254,7 +282,7 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
       <div className={expanded ? "relative min-h-0 flex-1" : "relative"}>
         <svg
           ref={svgRef}
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          viewBox={`0 0 ${width} ${height}`}
           className={
             expanded
               ? "h-full w-full touch-none cursor-grab active:cursor-grabbing"
