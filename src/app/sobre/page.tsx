@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "Sobre — Radar OSINT",
@@ -21,13 +22,16 @@ export default function AboutPage() {
           >
             Radar OSINT
           </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Voltar ao app
-          </Link>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Voltar ao app
+            </Link>
+          </div>
         </div>
       </header>
 

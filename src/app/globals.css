@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -18,6 +20,21 @@
   --color-line-strong: #c8c0b2;
   --color-accent: #7a1f1f;
   --color-accent-light: #d8a9a9;
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --color-paper: #0e1014;
+  --color-paper-raised: #151820;
+  --color-ink: #f2efe8;
+  --color-ink-soft: #e3ded4;
+  --color-muted: #a8a198;
+  --color-faint: #78736b;
+  --color-line: #2a2e37;
+  --color-line-strong: #3b404b;
+  --color-accent: #c98a8a;
+  --color-accent-light: #8a2e2e;
 }
 
 :root {
@@ -40,9 +57,18 @@ body {
   color: var(--color-ink);
 }
 
+.dark ::selection {
+  background: rgba(201, 138, 138, 0.22);
+  color: #ffffff;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: #c8c0b2 transparent;
+}
+
+.dark * {
+  scrollbar-color: #3b404b transparent;
 }
 
 *::-webkit-scrollbar {
@@ -59,6 +85,16 @@ body {
 
 *::-webkit-scrollbar-thumb:hover {
   background: #a89f8f;
+  background-clip: content-box;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: #3b404b;
+  background-clip: content-box;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: #4b5262;
   background-clip: content-box;
 }
 

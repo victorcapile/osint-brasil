@@ -58,7 +58,7 @@ function RadarLead({
         </p>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-[10px] uppercase tracking-[0.14em] text-paper/40">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-paper/10 pt-4 text-[10px] uppercase tracking-[0.14em] text-paper/40">
         <span className="min-w-0 truncate">{article.sourceName}</span>
         <div className="flex items-center gap-4">
           <FavoriteButton
@@ -135,10 +135,10 @@ function RadarStory({
 function RadarSkeleton() {
   return (
     <div className="mt-6 border-t-2 border-accent bg-ink px-6 py-8 sm:px-10">
-      <div className="h-2 w-24 animate-pulse bg-white/10" />
-      <div className="mt-6 h-9 w-3/4 animate-pulse bg-white/10" />
-      <div className="mt-3 h-9 w-1/2 animate-pulse bg-white/10" />
-      <div className="mt-6 h-3 w-2/3 animate-pulse bg-white/5" />
+      <div className="h-2 w-24 animate-pulse bg-paper/10" />
+      <div className="mt-6 h-9 w-3/4 animate-pulse bg-paper/10" />
+      <div className="mt-3 h-9 w-1/2 animate-pulse bg-paper/10" />
+      <div className="mt-6 h-3 w-2/3 animate-pulse bg-paper/5" />
     </div>
   );
 }

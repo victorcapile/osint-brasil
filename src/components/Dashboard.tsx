@@ -28,6 +28,7 @@ import { formatClock, formatNumber, formatRelevance } from "@/lib/format";
 import FeedView from "./FeedView";
 import MapView from "./MapView";
 import RadarView from "./RadarView";
+import ThemeToggle from "./ThemeToggle";
 
 type View = "mapa" | "radar" | "feed";
 type ScopeFilter = "todos" | Scope;
@@ -537,6 +538,7 @@ export default function Dashboard() {
             <span className="hidden whitespace-nowrap text-[10px] uppercase tracking-[0.14em] text-faint md:inline">
               Atualizado {formatClock(stats?.lastRefresh ?? null)}
             </span>
+            <ThemeToggle />
             <button
               type="button"
               onClick={handleRefresh}

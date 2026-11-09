@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { FeatureCollection, Geometry } from "geojson";
 import { COUNTRY_BY_CODE } from "@/lib/country-data";
+import { useTheme } from "./ThemeProvider";
 
 interface CountryProperties {
   ISO_A2?: string;
@@ -28,7 +29,8 @@ const DESKTOP_HEIGHT = 480;
 // No mobile, um disco equal-area centrado no Brasil ocupa muito melhor a tela.
 const MOBILE_SIZE = 620;
 const MAX_ZOOM = 10;
-const HEAT = ["#ece7dc", "#d8d1c4", "#bbb2a2", "#8c8374", "#575149", "#1d1b18"];
+const LIGHT_HEAT = ["#ece7dc", "#d8d1c4", "#bbb2a2", "#8c8374", "#575149", "#1d1b18"];
+const DARK_HEAT = ["#1b1f27", "#2c313b", "#454b57", "#6d7280", "#a9a398", "#f3efe7"];
 
 function featureCode(properties: CountryProperties): string | null {
   const iso = properties.ISO_A2 ?? "";
@@ -38,13 +40,13 @@ function featureCode(properties: CountryProperties): string | null {
   return null;
 }
 
-function heatColor(count: number): string {
-  if (count <= 0) return HEAT[0];
-  if (count < 3) return HEAT[1];
-  if (count < 10) return HEAT[2];
-  if (count < 30) return HEAT[3];
-  if (count < 100) return HEAT[4];
-  return HEAT[5];
+function heatColor(count: number, palette: string[]): string {
+  if (count <= 0) return palette[0];
+  if (count < 3) return palette[1];
+  if (count < 10) return palette[2];
+  if (count < 30) return palette[3];
+  if (count < 100) return palette[4];
+  return palette[5];
 }
 
 interface WorldMapProps {
@@ -67,6 +69,12 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
       typeof window !== "undefined" &&
       window.matchMedia("(max-width: 639px)").matches,
   );
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const heat = isDark ? DARK_HEAT : LIGHT_HEAT;
+  const borderStroke = isDark ? "#0e1014" : "#f4f1ea";
+  const hoverStroke = isDark ? "#f2efe8" : "#161513";
+  const selectedStroke = isDark ? "#d19a9a" : "#7a1f1f";
 
   const width = isMobile ? MOBILE_SIZE : DESKTOP_WIDTH;
   const height = isMobile ? MOBILE_SIZE : DESKTOP_HEIGHT;
@@ -301,9 +309,13 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
                 <path
                   key={item.key}
                   d={item.d}
-                  fill={heatColor(item.count)}
+                  fill={heatColor(item.count, heat)}
                   stroke={
-                    isSelected ? "#7a1f1f" : isHovered ? "#161513" : "#f4f1ea"
+                    isSelected
+                      ? selectedStroke
+                      : isHovered
+                        ? hoverStroke
+                        : borderStroke
                   }
                   strokeWidth={isSelected ? 1.6 : isHovered ? 1 : 0.5}
                   className={
@@ -397,7 +409,7 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
       <div className="mt-2 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-faint">
         <span>Menos</span>
         <div className="flex items-center gap-1">
-          {HEAT.map((color) => (
+          {heat.map((color) => (
             <span
               key={color}
               className="h-2 w-6"

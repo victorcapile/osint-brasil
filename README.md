@@ -83,6 +83,8 @@ O deploy manual também funciona com `vercel --prod`.
   fallback para o resumo quando o veículo bloqueia o acesso.
 - Página **Sobre** (`/sobre`) com metodologia, limites, privacidade e autoria, acessível
   pelo canto direito do menu e pelo rodapé.
+- **Modo claro e noturno** com toggle no cabeçalho, persistência em `localStorage` e respeito
+  ao tema do sistema quando não há escolha salva.
 - Interface editorial (papel e tinta), com tipografia serifada e controles discretos.
 
 ---
@@ -102,6 +104,12 @@ O topo do painel tem três modos persistentes:
   **Fluxo** e **Favoritos** alternam entre o fluxo geral e a lista salva.
 
 O modo ativo fica no hash da URL (`#mapa`, `#radar`, `#feed`) e o menu continua fixo ao rolar.
+
+### Tema claro e escuro
+
+O botão de sol/lua no cabeçalho alterna o tema. A escolha fica salva em `localStorage`; sem
+escolha, o app respeita o `prefers-color-scheme` do sistema. O mapa, o bloco do Radar, o Feed,
+o leitor e a página Sobre têm paletas próprias para o modo noturno.
 
 ### Leitura interna
 
@@ -245,6 +253,8 @@ src/
     SocialPost.tsx          # post do feed social
     FavoriteButton.tsx      # botão Salvar/Salvo
     BackButton.tsx          # voltar no leitor
+    ThemeProvider.tsx       # estado do tema claro/noturno
+    ThemeToggle.tsx         # botão de alternância do tema
     ViewHeader.tsx          # cabeçalho editorial de cada modo
     WorldMap.tsx            # mapa + heatmap
     CountryPanel.tsx        # ranking e notícias do país

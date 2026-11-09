@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import BackButton from "@/components/BackButton";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   getArticleById,
   getCachedArticleContent,
@@ -85,7 +86,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           >
             Radar OSINT
           </Link>
-          <BackButton />
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <BackButton />
+          </div>
         </div>
       </header>
 
