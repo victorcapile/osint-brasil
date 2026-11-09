@@ -98,8 +98,8 @@ O topo do painel tem três modos persistentes:
   arraste, controles de zoom e **modo tela cheia**. Clique em um país para ver o total, as
   últimas manchetes e abrir o leitor interno. O ranking de países complementa o mapa.
 - **Radar** — notícias com relevância ≥ 5,0 para a inteligência de Estado, com um destaque
-  principal, os eixos monitorados (Amazônia, Defesa, Fronteiras, Ciber etc.) e a lista
-  ordenada por score.
+  em **1/3 da largura** que alterna entre as **três maiores notas** (botões de anterior/próximo),
+  os eixos monitorados (Amazônia, Defesa, Fronteiras, Ciber etc.) e a lista ordenada por score.
 - **Feed** — fluxo em coluna única no estilo rede social: avatar/fonte, `@handle`, data e
   hora, gênero, região, manchete, resumo e link para leitura. No topo do Feed, as abas
   **Fluxo** e **Favoritos** alternam entre o fluxo geral e a lista salva.

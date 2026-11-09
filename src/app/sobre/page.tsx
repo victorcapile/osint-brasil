@@ -189,8 +189,8 @@ export default function AboutPage() {
                 </li>
                 <li>
                   <strong className="font-medium text-ink">Radar:</strong>{" "}
-                  notícias com relevância ≥ 5,0, com destaque principal e eixos
-                  monitorados.
+                  notícias com relevância ≥ 5,0, com destaque em 1/3 da largura
+                  que alterna entre as três maiores notas, e eixos monitorados.
                 </li>
                 <li>
                   <strong className="font-medium text-ink">

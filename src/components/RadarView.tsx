@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CONTINENT_META, GENRE_META, TAG_LABELS } from "@/lib/types";
 import { formatArticleDate, formatRelevance } from "@/lib/format";
@@ -14,12 +18,20 @@ interface RadarViewProps {
 
 function RadarLead({
   article,
+  index,
+  total,
   isFavorite,
   onToggleFavorite,
+  onPrev,
+  onNext,
 }: {
   article: Article;
+  index: number;
+  total: number;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onPrev: () => void;
+  onNext: () => void;
 }) {
   const genre = GENRE_META[article.genre];
   const region = CONTINENT_META[article.continent];
@@ -28,15 +40,33 @@ function RadarLead({
     .filter((tag): tag is string => Boolean(tag));
 
   return (
-    <article className="mt-6 border-t-2 border-accent bg-ink px-6 py-8 text-paper sm:px-10">
+    <article className="border-t-2 border-accent bg-ink px-6 py-8 text-paper">
       <div className="flex items-center justify-between gap-4 text-[10px] uppercase tracking-[0.18em]">
         <span className="text-accent-light">{genre.label}</span>
-        <span className="text-paper/40">
-          Relevância {formatRelevance(article.relevance)}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="tabular-nums text-paper/55">
+            {index + 1} / {total}
+          </span>
+          <button
+            type="button"
+            onClick={onPrev}
+            aria-label="Destaque anterior"
+            className="inline-flex h-7 w-7 items-center justify-center border border-paper/30 text-paper/70 transition hover:border-paper/60 hover:text-paper focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-light/60"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            aria-label="Próximo destaque"
+            className="inline-flex h-7 w-7 items-center justify-center border border-paper/30 text-paper/70 transition hover:border-paper/60 hover:text-paper focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-light/60"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
-      <h2 className="mt-4 max-w-4xl font-serif text-[30px] leading-[1.12] tracking-tight text-paper decoration-accent-light underline-offset-4 sm:text-[38px]">
+      <h2 className="mt-4 font-serif text-[26px] leading-[1.13] tracking-tight text-paper decoration-accent-light underline-offset-4 sm:text-[30px]">
         <Link
           href={`/noticia/${article.id}`}
           prefetch={false}
@@ -47,20 +77,23 @@ function RadarLead({
       </h2>
 
       {article.description ? (
-        <p className="mt-4 line-clamp-3 max-w-2xl text-[13.5px] leading-relaxed text-paper/55">
+        <p className="mt-4 line-clamp-3 text-[13.5px] leading-relaxed text-paper/55">
           {article.description}
         </p>
       ) : null}
 
       {tags.length > 0 ? (
-        <p className="mt-5 text-[9px] uppercase tracking-[0.16em] text-paper/40">
+        <p className="mt-5 text-[9px] uppercase tracking-[0.16em] text-paper/55">
           {tags.slice(0, 5).join(" · ")}
         </p>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-paper/10 pt-4 text-[10px] uppercase tracking-[0.14em] text-paper/40">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-paper/10 pt-4 text-[10px] uppercase tracking-[0.14em] text-paper/55">
         <span className="min-w-0 truncate">{article.sourceName}</span>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="shrink-0 tabular-nums text-accent-light">
+            R {formatRelevance(article.relevance)}
+          </span>
           <FavoriteButton
             active={isFavorite}
             onToggle={onToggleFavorite}
@@ -149,8 +182,11 @@ export default function RadarView({
   favoriteIds,
   onToggleFavorite,
 }: RadarViewProps) {
-  const lead = radar[0] ?? null;
-  const rest = radar.slice(1);
+  const [leadIndex, setLeadIndex] = useState(0);
+  const featured = radar.slice(0, 3);
+  const lead =
+    featured.length > 0 ? featured[leadIndex % featured.length] : null;
+  const rest = radar.slice(featured.length);
 
   const tagCounts = new Map<string, number>();
   for (const article of radar) {
@@ -189,13 +225,26 @@ export default function RadarView({
           </p>
         </div>
       ) : (
-        <>
-          <RadarLead
-            article={lead}
-            isFavorite={favoriteIds.has(lead.id)}
-            onToggleFavorite={() => onToggleFavorite(lead)}
-          />
-          <div className="grid gap-x-10 md:grid-cols-2">
+        <div className="mt-6 grid gap-x-10 gap-y-2 lg:grid-cols-3">
+          <div className="min-w-0 lg:col-span-1">
+            <RadarLead
+              article={lead}
+              index={leadIndex % featured.length}
+              total={featured.length}
+              isFavorite={favoriteIds.has(lead.id)}
+              onToggleFavorite={() => onToggleFavorite(lead)}
+              onPrev={() =>
+                setLeadIndex(
+                  (current) =>
+                    (current - 1 + featured.length) % featured.length,
+                )
+              }
+              onNext={() =>
+                setLeadIndex((current) => (current + 1) % featured.length)
+              }
+            />
+          </div>
+          <div className="grid min-w-0 gap-x-10 md:grid-cols-2 lg:col-span-2">
             {rest.map((article) => (
               <RadarStory
                 key={article.id}
@@ -205,7 +254,7 @@ export default function RadarView({
               />
             ))}
           </div>
-        </>
+        </div>
       )}
     </section>
   );
