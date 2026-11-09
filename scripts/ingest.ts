@@ -1,7 +1,11 @@
-import { ingestAll } from "../src/lib/rss";
+import { config } from "dotenv";
+
+config({ path: ".env.local" });
 
 async function main() {
+  const { ingestAll } = await import("../src/lib/rss");
   const result = await ingestAll();
+
   console.log(
     JSON.stringify(
       {

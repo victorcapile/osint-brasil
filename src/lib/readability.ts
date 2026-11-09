@@ -1,5 +1,5 @@
 import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
+import { parseHTML } from "linkedom";
 import sanitizeHtml from "sanitize-html";
 
 const FETCH_TIMEOUT_MS = 12_000;
@@ -49,10 +49,9 @@ export async function extractArticleContent(url: string): Promise<string | null>
     const html = await response.text();
     if (html.length < 500) return null;
 
-    const dom = new JSDOM(html, { url });
-    const reader = new Readability(dom.window.document);
+    const dom = parseHTML(html);
+    const reader = new Readability(dom.document as unknown as Document);
     const parsed = reader.parse();
-    dom.window.close();
 
     if (!parsed?.content) return null;
 

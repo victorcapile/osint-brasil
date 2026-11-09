@@ -56,11 +56,18 @@ export async function GET(request: NextRequest) {
     limit: Number.isFinite(limitRaw) && limitRaw > 0 ? limitRaw : 150,
   };
 
+  const [articles, total, radar, stats] = await Promise.all([
+    queryArticles(filters),
+    countArticlesFiltered(filters),
+    getRadar(40),
+    getStats(),
+  ]);
+
   const payload = {
-    articles: queryArticles(filters),
-    total: countArticlesFiltered(filters),
-    radar: getRadar(40),
-    stats: getStats(),
+    articles,
+    total,
+    radar,
+    stats,
     generatedAt: new Date().toISOString(),
   };
 

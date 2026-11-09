@@ -32,7 +32,7 @@ export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { id } = await params;
-  const article = getArticleById(id);
+  const article = await getArticleById(id);
   return {
     title: article ? `${article.title} — Radar OSINT` : "Notícia — Radar OSINT",
   };
@@ -40,10 +40,10 @@ export async function generateMetadata({
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { id } = await params;
-  const article = getArticleById(id);
+  const article = await getArticleById(id);
   if (!article) notFound();
 
-  const cached = getCachedArticleContent(id);
+  const cached = await getCachedArticleContent(id);
   let contentHtml = cached?.html ?? "";
 
   if (!contentHtml) {
@@ -54,7 +54,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
     if (shouldRetry) {
       const extracted = await extractArticleContent(article.link);
-      setCachedArticleContent(id, extracted ?? "");
+      await setCachedArticleContent(id, extracted ?? "");
       contentHtml = extracted ?? "";
     }
   }

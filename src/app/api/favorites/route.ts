@@ -10,8 +10,8 @@ import { FAVORITES_RETENTION_DAYS } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  pruneFavorites(FAVORITES_RETENTION_DAYS);
-  const favorites = listFavorites();
+  await pruneFavorites(FAVORITES_RETENTION_DAYS);
+  const favorites = await listFavorites();
 
   return NextResponse.json(
     { favorites, total: favorites.length },
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  pruneFavorites(FAVORITES_RETENTION_DAYS);
-  const favorite = addFavorite(articleId);
+  await pruneFavorites(FAVORITES_RETENTION_DAYS);
+  const favorite = await addFavorite(articleId);
 
   if (!favorite) {
     return NextResponse.json(
@@ -55,7 +55,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "id é obrigatório." }, { status: 400 });
   }
 
-  const removed = removeFavorite(id);
+  const removed = await removeFavorite(id);
   return NextResponse.json(
     { ok: true, removed },
     { headers: { "cache-control": "no-store" } },

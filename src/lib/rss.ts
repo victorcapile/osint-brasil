@@ -3,12 +3,14 @@ import Parser from "rss-parser";
 import { classifyArticle } from "./classify";
 import { normalize } from "./text";
 import {
-  getDb,
+  getAllArticleBasics,
   insertArticles,
   pruneArticleContent,
   pruneFavorites,
   pruneOld,
   setMeta,
+  updateArticleClassifications,
+  type ClassificationUpdate,
   type NewArticle,
 } from "./db";
 import { SOURCES, SOURCE_BY_ID, type FeedSource } from "./sources";
@@ -262,58 +264,35 @@ async function fetchSource(source: FeedSource, fetchedAt: string): Promise<NewAr
  * Reaplica a classificação em todo o acervo. Isso mantém o banco consistente
  * quando as regras heurísticas mudam e corrige itens que já saíram do feed.
  */
-function reclassifyAll(): void {
-  const db = getDb();
-  const rows = db
-    .prepare("SELECT id, title, description, source_id, source_name FROM articles")
-    .all() as unknown as {
-    id: string;
-    title: string;
-    description: string;
-    source_id: string;
-    source_name: string;
-  }[];
+async function reclassifyAll(): Promise<void> {
+  const rows = await getAllArticleBasics();
   if (rows.length === 0) return;
 
-  const update = db.prepare(`
-    UPDATE articles SET
-      description = ?,
-      genre       = ?,
-      scope       = ?,
-      country     = ?,
-      continent   = ?,
-      relevance   = ?,
-      tags        = ?,
-      search_text = ?
-    WHERE id = ?
-  `);
+  const updates: ClassificationUpdate[] = [];
 
-  db.exec("BEGIN");
-  try {
-    for (const row of rows) {
-      const source = SOURCE_BY_ID.get(row.source_id);
-      if (!source) continue;
+  for (const row of rows) {
+    const source = SOURCE_BY_ID.get(row.source_id);
+    if (!source) continue;
 
-      const description = stripBoilerplate(row.description);
-      const classification = classifyArticle(row.title, description, source);
+    const description = stripBoilerplate(row.description);
+    const classification = classifyArticle(row.title, description, source);
 
-      update.run(
-        description,
-        classification.genre,
-        classification.scope,
-        classification.country,
-        classification.continent,
-        classification.relevance,
-        JSON.stringify(classification.tags),
-        normalize(`${row.title} ${description} ${row.source_name}`),
-        row.id,
-      );
-    }
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
+    updates.push({
+      id: row.id,
+      description,
+      genre: classification.genre,
+      scope: classification.scope,
+      country: classification.country,
+      continent: classification.continent,
+      relevance: classification.relevance,
+      tags: classification.tags,
+      searchText: normalize(
+        `${row.title} ${description} ${row.source_name}`,
+      ),
+    });
   }
+
+  await updateArticleClassifications(updates);
 }
 
 export async function ingestAll(): Promise<RefreshResult> {
@@ -352,14 +331,14 @@ export async function ingestAll(): Promise<RefreshResult> {
     return true;
   });
 
-  const inserted = insertArticles(unique);
-  pruneOld(MAX_AGE_DAYS);
-  pruneFavorites();
-  pruneArticleContent();
-  reclassifyAll();
+  const inserted = await insertArticles(unique);
+  await pruneOld(MAX_AGE_DAYS);
+  await pruneFavorites();
+  await pruneArticleContent();
+  await reclassifyAll();
 
   const lastRefresh = new Date().toISOString();
-  setMeta("last_refresh", lastRefresh);
+  await setMeta("last_refresh", lastRefresh);
 
   return {
     ok: true,

@@ -7,26 +7,35 @@ O painel coleta feeds RSS de veículos nacionais e internacionais, classifica ca
 **escopo** (nacional/internacional), **continente** e **gênero**, e calcula uma **relevância
 estratégica** para destacar temas sensíveis no modo **Radar**.
 
-> MVP local: roda em `localhost`, sem chave de API e sem dependência de serviços pagos.
+> Online em **Vercel + Neon Postgres**. O app não usa chaves de API de notícias.
 
 ---
 
 ## Rodar
 
-Requisitos: Node.js 22+ (recomendado 24/25) e npm.
+Requisitos: Node.js 22+ (recomendado 24/25), npm e um Postgres acessível (Neon/Supabase).
 
 ```bash
+cp .env.example .env.local
+# edite DATABASE_URL com a string pooled do Neon/Supabase
 npm install
+npm run dev
+```
+
+Se o projeto já estiver ligado ao Vercel:
+
+```bash
+vercel env pull .env.local
 npm run dev
 ```
 
 Abra <http://localhost:3000>.
 
-Na primeira carga, o banco está vazio e o próprio painel dispara a coleta inicial (pode levar
-até ~30 segundos). Depois disso, use o botão **Atualizar** para buscar novas notícias.
+Na primeira carga, o schema é criado automaticamente e o painel dispara a coleta inicial
+(pode levar até ~30 segundos). Depois disso, use **Atualizar** ou `npm run ingest`.
 
-Para zerar os dados coletados, pare o servidor e apague `data/news.db` (ou a pasta `data/`).
-Na próxima abertura, a base é recriada automaticamente.
+O banco fica no Postgres (Neon). Para zerar os dados, apague as tabelas no SQL Editor ou
+recrie o banco; o schema é recriado na próxima consulta.
 
 ### Scripts
 
@@ -40,18 +49,34 @@ Na próxima abertura, a base é recriada automaticamente.
 
 ---
 
+## Deploy
+
+- Repositório: <https://github.com/victorcapile/osintbrasil>
+- Vercel: projeto `osintbrasil` (conta `victor-8268`)
+- Banco: **Neon** via Vercel Marketplace (`DATABASE_URL` em Production/Preview/Development)
+- URL: <https://osintbrasil.vercel.app>
+
+```bash
+vercel --prod
+```
+
+O deploy por CLI funciona sem a integração GitHub. Para deploy automático a cada push, conecte
+o repositório ao projeto no painel do Vercel (a GitHub App precisa de acesso ao repo privado).
+
+---
+
 ## O que já funciona
 
 - **36 fontes RSS** brasileiras e internacionais, mais buscas temáticas do Google News.
 - Coleta paralela com timeout, deduplicação por link e por título, janela de 30 dias.
-- Persistência local em **SQLite** (`data/news.db`), com atualização incremental.
+- Persistência em **Postgres (Neon)**, com atualização incremental.
 - Classificação heurística em português, inglês e espanhol.
 - **Filtros** por país, escopo, continente, gênero e relevância mínima.
 - **Busca sem acentos** (ex.: `amazonia` encontra “Amazônia”).
 - Ordenação por mais recentes ou mais relevantes.
 - Três modos de leitura: **Mapa** (heatmap por país), **Radar** (notícias estratégicas) e
   **Feed** (fluxo social em coluna única).
-- **Favoritos** por notícia, persistidos no SQLite e agrupados na aba **Favoritos** do Feed
+- **Favoritos** por notícia, persistidos no Postgres e agrupados na aba **Favoritos** do Feed
   para ler depois. Artigos e favoritos têm retenção de **30 dias**.
 - **Leitura interna**: cada notícia abre em `/noticia/<id>`, com extração Readability e
   fallback para o resumo quando o veículo bloqueia o acesso.
@@ -104,7 +129,7 @@ src/lib/rss.ts       → coleta, limpeza e deduplicação
         ↓
 src/lib/classify.ts  → geografia + gênero + relevância
         ↓
-src/lib/db.ts        → SQLite (artigos, índices e metadados)
+src/lib/db.ts        → Postgres/Neon (artigos, índices e metadados)
         ↓
 src/app/api/*        → API de leitura e de atualização
         ↓
@@ -222,7 +247,7 @@ src/
     countries.ts            # detecção de país e continente
     country-data.ts         # base ISO/nomes (Natural Earth)
     readability.ts          # extração/sanitização do texto original
-    db.ts                   # SQLite
+    db.ts                   # Postgres/Neon (cliente postgres)
     types.ts                # tipos e metadados de UI
     format.ts               # datas/números
     text.ts                 # normalização de texto
@@ -231,8 +256,9 @@ public/
 scripts/
   ingest.ts                 # coleta via CLI
   tune-classify.ts          # diagnóstico de classificação
+  migrate-sqlite.ts         # migração única do SQLite local para o Postgres
 data/
-  news.db                   # gerado automaticamente (ignorado no git)
+  news.db                   # opcional: só para a migração única (ignorado no git)
 ```
 
 ---
@@ -243,13 +269,14 @@ data/
   O próximo salto é usar um LLM para rotular e resumir, mantendo a heurística como fallback.
 - O painel carrega até 150 notícias por vez (o total filtrado aparece no cabeçalho).
 - A atualização é manual (botão ou CLI). Um cron/agendador pode chamar `POST /api/refresh`.
-- Não há autenticação — adequado apenas para uso local.
-- Ideias: GDELT/NewsAPI, alertas por tema, mapa de calor, exportação CSV/JSON, resumos com IA,
-  detecção de duplicatas semânticas e deploy.
+- Não há autenticação — quem tiver a URL pública na Vercel consegue acessar.
+- Ideias: GDELT/NewsAPI, alertas por tema, exportação CSV/JSON, resumos com IA e detecção de
+  duplicatas semânticas.
 
 ---
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · SQLite (`node:sqlite`) ·
-`rss-parser` · `lucide-react`
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 ·
+PostgreSQL (Neon) · `postgres` · `rss-parser` · `d3-geo`/`d3-zoom` · `lucide-react` ·
+Vercel
