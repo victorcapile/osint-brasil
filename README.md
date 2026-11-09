@@ -68,7 +68,8 @@ O deploy manual também funciona com `vercel --prod`.
 
 ## O que já funciona
 
-- **36 fontes RSS** brasileiras e internacionais, mais buscas temáticas do Google News.
+- **48 fontes RSS** brasileiras e internacionais, de diferentes espectros editoriais, mais
+  buscas temáticas do Google News.
 - Coleta paralela com timeout, deduplicação por link e por título, janela de 30 dias.
 - Persistência em **Postgres (Neon)**, com atualização incremental.
 - Classificação heurística em português, inglês e espanhol.
@@ -118,8 +119,12 @@ A página mostra o snapshot editorial e tenta extrair o texto principal da maté
 **Readability**; o HTML é sanitizado e guardado em cache por 30 dias. A extração remove blocos
 de **“publicidade”**, “leia também” e chamadas promocionais. Se o veículo bloquear a extração
 (paywall, 403, JavaScript obrigatório) ou o texto parecer incompleto, a página exibe o resumo
-do feed, o aviso **“Não foi possível captar a notícia na íntegra”** e o link
-**“Ler no veículo original”**.
+do feed e o aviso **“Não foi possível captar a notícia na íntegra”**.
+
+Para contornar o paywall, o leitor oferece **“A matéria não abriu?”**: basta copiar o texto no
+veículo original e colar no app (ou usar **Colar da área de transferência**). O texto é
+renderizado no layout editorial do Radar e fica salvo apenas em `localStorage`, no navegador
+do leitor. O link **“Ler no veículo original”** aparece uma única vez, no topo da matéria.
 
 ### Favoritos e retenção
 
@@ -171,10 +176,8 @@ Gêneros: **Geopolítica**, **Negócios**, **Ciência**, **Esportes**, **Seguran
 
 Cada notícia recebe um **país** (código ISO alpha-2) quando o texto cita o país, um gentílico
 ou a capital. Notícias nacionais sem menção explícita são atribuídas ao Brasil. O mapa usa a
-base **Natural Earth 110m** (`public/geo/countries.geojson`). No desktop, a projeção é
-**Equal Earth**; no mobile, um **azimutal de área igual centrado no Brasil** em formato
-quadrado, para dar mais área útil e legibilidade. Cada país é pintado conforme o volume de
-notícias.
+base **Natural Earth 110m** (`public/geo/countries.geojson`) com projeção **Mercator**. Cada
+país é pintado conforme o volume de notícias.
 
 O mapa tem zoom (roda do mouse ou pinça), pan por arraste e botão de tela cheia — útil
 principalmente no mobile. Ao clicar em um país com notícias:

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ArticleReader from "@/components/ArticleReader";
 import BackButton from "@/components/BackButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import {
@@ -139,54 +140,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </span>
         </div>
 
-        {contentHtml ? (
-          <>
-            <div
-              className="reader-content mt-8"
-              dangerouslySetInnerHTML={{ __html: contentHtml }}
-            />
-            {contentPartial ? (
-              <p className="mt-8 border-l-2 border-line-strong pl-4 text-[12px] leading-relaxed text-faint">
-                Não foi possível captar a notícia na íntegra.{" "}
-                <a
-                  href={article.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
-                >
-                  Ler no veículo original ↗
-                </a>
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <div className="mt-8">
-            <p className="text-[16px] leading-relaxed text-muted">
-              {article.description || "Resumo não disponível."}
-            </p>
-            <p className="mt-6 border-l-2 border-line-strong pl-4 text-[12px] leading-relaxed text-faint">
-              Não foi possível captar a notícia na íntegra.{" "}
-              <a
-                href={article.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
-              >
-                Ler no veículo original ↗
-              </a>
-            </p>
-          </div>
-        )}
+        <ArticleReader
+          articleId={article.id}
+          contentHtml={contentHtml}
+          contentPartial={contentPartial}
+          description={article.description}
+        />
 
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
-          <a
-            href={article.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] uppercase tracking-[0.16em] text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
-          >
-            Ler no veículo original ↗
-          </a>
+        <div className="mt-12 flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
           <Link
             href="/"
             className="text-[10px] uppercase tracking-[0.16em] text-faint transition hover:text-ink"

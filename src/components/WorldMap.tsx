@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { geoAzimuthalEqualArea, geoEqualEarth, geoPath } from "d3-geo";
+import { geoMercator, geoPath } from "d3-geo";
 import { select } from "d3-selection";
 import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
 import {
@@ -24,10 +24,9 @@ interface CountryProperties {
 }
 
 const DESKTOP_WIDTH = 960;
-// Equal Earth tem proporção próxima de 2:1.
-const DESKTOP_HEIGHT = 480;
-// No mobile, um disco equal-area centrado no Brasil ocupa muito melhor a tela.
-const MOBILE_SIZE = 620;
+const DESKTOP_HEIGHT = 600;
+const MOBILE_WIDTH = 620;
+const MOBILE_HEIGHT = 420;
 const MAX_ZOOM = 10;
 const LIGHT_HEAT = ["#ece7dc", "#d8d1c4", "#bbb2a2", "#8c8374", "#575149", "#1d1b18"];
 const DARK_HEAT = ["#1b1f27", "#2c313b", "#454b57", "#6d7280", "#a9a398", "#f3efe7"];
@@ -76,8 +75,8 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
   const hoverStroke = isDark ? "#f2efe8" : "#161513";
   const selectedStroke = isDark ? "#d19a9a" : "#7a1f1f";
 
-  const width = isMobile ? MOBILE_SIZE : DESKTOP_WIDTH;
-  const height = isMobile ? MOBILE_SIZE : DESKTOP_HEIGHT;
+  const width = isMobile ? MOBILE_WIDTH : DESKTOP_WIDTH;
+  const height = isMobile ? MOBILE_HEIGHT : DESKTOP_HEIGHT;
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const groupRef = useRef<SVGGElement | null>(null);
@@ -121,23 +120,13 @@ export default function WorldMap({ counts, selected, onSelect }: WorldMapProps) 
   const paths = useMemo(() => {
     if (!data) return [];
 
-    const projection = isMobile
-      ? geoAzimuthalEqualArea()
-          .rotate([55, 10])
-          .fitExtent(
-            [
-              [12, 12],
-              [width - 12, height - 12],
-            ],
-            data,
-          )
-      : geoEqualEarth().fitExtent(
-          [
-            [12, 12],
-            [width - 12, height - 12],
-          ],
-          data,
-        );
+    const projection = geoMercator().fitExtent(
+      [
+        [12, 12],
+        [width - 12, height - 12],
+      ],
+      data,
+    );
     const path = geoPath(projection);
 
     return data.features.map((feature, index) => {
