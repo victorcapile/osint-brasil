@@ -18,7 +18,10 @@ import {
   formatClock,
   formatRelevance,
 } from "@/lib/format";
-import { extractArticleContent } from "@/lib/readability";
+import {
+  extractArticleContent,
+  isPartialArticleContent,
+} from "@/lib/readability";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +61,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       contentHtml = extracted ?? "";
     }
   }
+
+  const contentPartial = contentHtml
+    ? isPartialArticleContent(contentHtml)
+    : true;
 
   const genre = GENRE_META[article.genre];
   const region = CONTINENT_META[article.continent];
@@ -129,18 +136,40 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
 
         {contentHtml ? (
-          <div
-            className="reader-content mt-8"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
-          />
+          <>
+            <div
+              className="reader-content mt-8"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
+            {contentPartial ? (
+              <p className="mt-8 border-l-2 border-line-strong pl-4 text-[12px] leading-relaxed text-faint">
+                Não foi possível captar a notícia na íntegra.{" "}
+                <a
+                  href={article.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
+                >
+                  Ler no veículo original ↗
+                </a>
+              </p>
+            ) : null}
+          </>
         ) : (
           <div className="mt-8">
             <p className="text-[16px] leading-relaxed text-muted">
               {article.description || "Resumo não disponível."}
             </p>
             <p className="mt-6 border-l-2 border-line-strong pl-4 text-[12px] leading-relaxed text-faint">
-              Não foi possível extrair o texto completo desta página. O resumo
-              acima veio do feed; use o link para ler no veículo original.
+              Não foi possível captar a notícia na íntegra.{" "}
+              <a
+                href={article.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink underline decoration-line-strong underline-offset-4 transition hover:decoration-accent"
+              >
+                Ler no veículo original ↗
+              </a>
             </p>
           </div>
         )}

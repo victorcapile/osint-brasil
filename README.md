@@ -46,6 +46,7 @@ recrie o banco; o schema é recriado na próxima consulta.
 | `npm start` | Serve o build de produção. |
 | `npm run ingest` | Coleta os feeds pelo terminal, sem abrir o site. |
 | `npm run tune -- "termo"` | Mostra por que uma notícia recebeu cada gênero (calibração). |
+| `npm run clear-content` | Limpa o cache de texto extraído das notícias e força nova extração. |
 
 ---
 
@@ -106,9 +107,11 @@ O modo ativo fica no hash da URL (`#mapa`, `#radar`, `#feed`) e o menu continua 
 
 Ao clicar em uma notícia, o app abre `/noticia/<id>` em vez de mandar o usuário para fora.
 A página mostra o snapshot editorial e tenta extrair o texto principal da matéria com
-**Readability**; o HTML é sanitizado e guardado em cache por 30 dias. Se o veículo bloquear a
-extração (paywall, 403, JavaScript obrigatório), a página exibe o resumo do feed e mantém o
-link **“Ler no veículo original”**.
+**Readability**; o HTML é sanitizado e guardado em cache por 30 dias. A extração remove blocos
+de **“publicidade”**, “leia também” e chamadas promocionais. Se o veículo bloquear a extração
+(paywall, 403, JavaScript obrigatório) ou o texto parecer incompleto, a página exibe o resumo
+do feed, o aviso **“Não foi possível captar a notícia na íntegra”** e o link
+**“Ler no veículo original”**.
 
 ### Favoritos e retenção
 
@@ -262,6 +265,7 @@ scripts/
   ingest.ts                 # coleta via CLI
   tune-classify.ts          # diagnóstico de classificação
   migrate-sqlite.ts         # migração única do SQLite local para o Postgres
+  clear-content-cache.ts    # limpa o cache de texto extraído
 data/
   news.db                   # opcional: só para a migração única (ignorado no git)
 ```

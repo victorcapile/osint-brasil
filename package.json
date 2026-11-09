@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "ingest": "tsx scripts/ingest.ts",
-    "tune": "tsx scripts/tune-classify.ts"
+    "tune": "tsx scripts/tune-classify.ts",
+    "clear-content": "tsx scripts/clear-content-cache.ts"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
