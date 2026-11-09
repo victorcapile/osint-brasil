@@ -5,6 +5,7 @@ import {
   getStats,
   queryArticles,
 } from "@/lib/db";
+import { SOURCE_BY_ID } from "@/lib/sources";
 import {
   CONTINENT_ORDER,
   GENRE_ORDER,
@@ -35,6 +36,11 @@ function readCountry(value: string | null): string | undefined {
   return /^[A-Z]{2}$/.test(code) ? code : undefined;
 }
 
+function readSource(value: string | null): string | undefined {
+  if (!value) return undefined;
+  return SOURCE_BY_ID.has(value) ? value : undefined;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
@@ -46,6 +52,7 @@ export async function GET(request: NextRequest) {
     genre: readGenre(searchParams.get("genre")),
     continent: readContinent(searchParams.get("continent")),
     country: readCountry(searchParams.get("country")),
+    sourceId: readSource(searchParams.get("source")),
     q: searchParams.get("q")?.slice(0, 120) ?? undefined,
     minRelevance:
       Number.isFinite(minRelevanceRaw) && minRelevanceRaw > 0 ? minRelevanceRaw : undefined,

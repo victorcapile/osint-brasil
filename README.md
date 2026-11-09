@@ -71,7 +71,7 @@ O deploy manual também funciona com `vercel --prod`.
 - Coleta paralela com timeout, deduplicação por link e por título, janela de 30 dias.
 - Persistência em **Postgres (Neon)**, com atualização incremental.
 - Classificação heurística em português, inglês e espanhol.
-- **Filtros** por país, escopo, continente, gênero e relevância mínima.
+- **Filtros** por país, escopo, continente, gênero, fonte e relevância mínima.
 - **Busca sem acentos** (ex.: `amazonia` encontra “Amazônia”).
 - Ordenação por mais recentes ou mais relevantes.
 - Três modos de leitura: **Mapa** (heatmap por país), **Radar** (notícias estratégicas) e

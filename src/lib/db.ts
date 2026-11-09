@@ -309,6 +309,7 @@ export interface QueryFilters {
   genre?: Genre;
   continent?: Continent;
   country?: string;
+  sourceId?: string;
   q?: string;
   minRelevance?: number;
   sort?: "recentes" | "relevancia";
@@ -337,6 +338,10 @@ function buildWhere(filters: QueryFilters): {
   if (filters.country) {
     where.push("country = ?");
     params.push(filters.country);
+  }
+  if (filters.sourceId) {
+    where.push("source_id = ?");
+    params.push(filters.sourceId);
   }
   if (filters.minRelevance && filters.minRelevance > 0) {
     where.push("relevance >= ?");
@@ -439,6 +444,12 @@ export async function getStats(): Promise<Stats> {
   );
   for (const row of countryRows) byCountry[row.key] = Number(row.count);
 
+  const bySource: Record<string, number> = {};
+  const sourceRows = await query<{ key: string; count: number | string }>(
+    "SELECT source_id AS key, COUNT(*) AS count FROM articles GROUP BY source_id",
+  );
+  for (const row of sourceRows) bySource[row.key] = Number(row.count);
+
   return {
     total: Number(totals?.total ?? 0),
     nacional: Number(totals?.nacional ?? 0),
@@ -448,6 +459,7 @@ export async function getStats(): Promise<Stats> {
     byGenre,
     byContinent,
     byCountry,
+    bySource,
     lastRefresh: await getMeta("last_refresh"),
   };
 }

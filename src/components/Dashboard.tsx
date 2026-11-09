@@ -22,6 +22,7 @@ import {
   RADAR_THRESHOLD,
 } from "@/lib/types";
 import { COUNTRY_BY_CODE } from "@/lib/country-data";
+import { SOURCES, SOURCE_BY_ID } from "@/lib/sources";
 import { formatClock, formatNumber, formatRelevance } from "@/lib/format";
 import FeedView from "./FeedView";
 import MapView from "./MapView";
@@ -81,12 +82,12 @@ function FilterSelect({
   children: ReactNode;
 }) {
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <label className="sr-only">{label}</label>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="appearance-none border-0 bg-transparent py-1.5 pl-0 pr-6 text-[12px] font-medium tracking-wide text-ink-soft focus:outline-none focus:ring-0"
+        className="w-full appearance-none border-0 bg-transparent py-1.5 pl-0 pr-6 text-[12px] font-medium tracking-wide text-ink-soft focus:outline-none focus:ring-0 sm:w-auto"
       >
         {children}
       </select>
@@ -172,6 +173,7 @@ export default function Dashboard() {
   const [genre, setGenre] = useState<GenreFilter>("todos");
   const [continent, setContinent] = useState<ContinentFilter>("todos");
   const [country, setCountry] = useState<string | null>(null);
+  const [source, setSource] = useState("todos");
   const [sort, setSort] = useState<"recentes" | "relevancia">("recentes");
 
   useEffect(() => {
@@ -202,11 +204,12 @@ export default function Dashboard() {
     if (genre !== "todos") params.set("genre", genre);
     if (continent !== "todos") params.set("continent", continent);
     if (country) params.set("country", country);
+    if (source !== "todos") params.set("source", source);
     if (debouncedQ.trim()) params.set("q", debouncedQ.trim());
     params.set("sort", sort);
     params.set("limit", "150");
     return `/api/articles?${params.toString()}`;
-  }, [scope, genre, continent, country, debouncedQ, sort]);
+  }, [scope, genre, continent, country, source, debouncedQ, sort]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -359,6 +362,7 @@ export default function Dashboard() {
     setGenre("todos");
     setContinent("todos");
     setCountry(null);
+    setSource("todos");
     setQ("");
     setDebouncedQ("");
     setSort("recentes");
@@ -374,6 +378,7 @@ export default function Dashboard() {
     genre !== "todos",
     continent !== "todos",
     country !== null,
+    source !== "todos",
     q.trim().length > 0,
   ].filter(Boolean).length;
 
@@ -395,8 +400,8 @@ export default function Dashboard() {
   }
 
   const feedToolbar = (
-    <div className="space-y-3 border-b border-line py-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-2 border-b border-line py-3">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="relative flex-1 md:max-w-xs">
           <Search className="pointer-events-none absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
           <input
@@ -419,7 +424,7 @@ export default function Dashboard() {
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-1">
           <FilterSelect label="Região" value={regionValue} onChange={handleRegionChange}>
             {country ? (
               <option value={`pais:${country}`}>
@@ -438,8 +443,6 @@ export default function Dashboard() {
             </optgroup>
           </FilterSelect>
 
-          <span className="hidden h-4 w-px bg-line sm:block" />
-
           <FilterSelect
             label="Gênero"
             value={genre}
@@ -453,7 +456,17 @@ export default function Dashboard() {
             ))}
           </FilterSelect>
 
-          <span className="hidden h-4 w-px bg-line sm:block" />
+          <FilterSelect label="Fonte" value={source} onChange={setSource}>
+            <option value="todos">Todas as fontes</option>
+            {SOURCES.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+                {stats?.bySource?.[item.id]
+                  ? ` (${stats.bySource[item.id]})`
+                  : ""}
+              </option>
+            ))}
+          </FilterSelect>
 
           <FilterSelect
             label="Ordenar"
@@ -470,7 +483,11 @@ export default function Dashboard() {
         <p className="text-[10px] uppercase tracking-[0.2em] text-faint">
           {data ? (
             <>
-              {country ? COUNTRY_BY_CODE.get(country)?.name ?? country : "Fluxo"}
+              {country
+                ? COUNTRY_BY_CODE.get(country)?.name ?? country
+                : source !== "todos"
+                  ? SOURCE_BY_ID.get(source)?.name ?? source
+                  : "Fluxo"}
               <span className="mx-2 text-line-strong">/</span>
               <span className="text-ink">
                 {totalMatches > articles.length
@@ -632,7 +649,6 @@ export default function Dashboard() {
         ) : view === "radar" ? (
           <RadarView
             radar={radar}
-            stats={stats ?? null}
             loading={loading}
             favoriteIds={favoriteIds}
             onToggleFavorite={toggleFavorite}

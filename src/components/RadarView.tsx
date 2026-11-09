@@ -1,18 +1,12 @@
 import Link from "next/link";
-import type { Article, Stats } from "@/lib/types";
-import {
-  CONTINENT_META,
-  GENRE_META,
-  RADAR_THRESHOLD,
-  TAG_LABELS,
-} from "@/lib/types";
+import type { Article } from "@/lib/types";
+import { CONTINENT_META, GENRE_META, TAG_LABELS } from "@/lib/types";
 import { formatArticleDate, formatRelevance } from "@/lib/format";
 import FavoriteButton from "./FavoriteButton";
 import ViewHeader from "./ViewHeader";
 
 interface RadarViewProps {
   radar: Article[];
-  stats: Stats | null;
   loading: boolean;
   favoriteIds: Set<string>;
   onToggleFavorite: (article: Article) => void;
@@ -151,7 +145,6 @@ function RadarSkeleton() {
 
 export default function RadarView({
   radar,
-  stats,
   loading,
   favoriteIds,
   onToggleFavorite,
@@ -184,10 +177,6 @@ export default function RadarView({
             <span className="ml-1.5 tabular-nums">{count}</span>
           </span>
         ))}
-        <span className="ml-auto shrink-0">
-          relevância ≥ {formatRelevance(RADAR_THRESHOLD)} ·{" "}
-          {stats?.radar ?? radar.length} notícias
-        </span>
       </div>
 
       {loading && radar.length === 0 ? (

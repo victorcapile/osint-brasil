@@ -56,6 +56,7 @@ export interface Stats {
   byGenre: Record<string, number>;
   byContinent: Record<string, number>;
   byCountry: Record<string, number>;
+  bySource: Record<string, number>;
   lastRefresh: string | null;
 }
 
