@@ -80,6 +80,8 @@ O deploy manual também funciona com `vercel --prod`.
   para ler depois. Artigos e favoritos têm retenção de **30 dias**.
 - **Leitura interna**: cada notícia abre em `/noticia/<id>`, com extração Readability e
   fallback para o resumo quando o veículo bloqueia o acesso.
+- Página **Sobre** (`/sobre`) com metodologia, limites, privacidade e autoria, acessível
+  pelo canto direito do menu e pelo rodapé.
 - Interface editorial (papel e tinta), com tipografia serifada e controles discretos.
 
 ---
@@ -228,6 +230,7 @@ src/
     api/refresh/route.ts    # dispara a coleta
     noticia/[id]/page.tsx   # leitor interno (extração + fallback)
     noticia/[id]/loading.tsx
+    sobre/page.tsx          # sobre o projeto, metodologia e autoria
     layout.tsx
     page.tsx
     globals.css

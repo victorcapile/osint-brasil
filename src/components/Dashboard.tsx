@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { ChevronDown, RefreshCw, Search, X } from "lucide-react";
@@ -551,7 +552,7 @@ export default function Dashboard() {
 
       <div className="sticky top-0 z-40 border-b-2 border-ink bg-paper/95 backdrop-blur-sm">
         <div className="mx-auto max-w-[1440px] px-5 lg:px-8">
-          <nav className="flex items-end gap-8">
+          <nav className="flex items-end gap-5 sm:gap-8">
             {VIEWS.map((item) => {
               const active = view === item.id;
               const count = countFor(item.id);
@@ -580,6 +581,12 @@ export default function Dashboard() {
                 </button>
               );
             })}
+            <Link
+              href="/sobre"
+              className="ml-auto shrink-0 py-4 text-[9px] uppercase tracking-[0.16em] text-faint transition hover:text-ink sm:text-[10px]"
+            >
+              Sobre
+            </Link>
           </nav>
         </div>
       </div>
@@ -669,11 +676,23 @@ export default function Dashboard() {
 
       <footer className="mt-16 border-t border-line">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-5 py-8 text-[11px] leading-relaxed text-faint sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p>Radar OSINT · MVP local · Coleta via RSS · Classificação heurística</p>
-          <p>
-            Fontes abertas. Edite{" "}
-            <code className="text-ink-soft">src/lib/sources.ts</code> para adicionar feeds.
-          </p>
+          <p>Radar OSINT · Projeto independente · Coleta via RSS · Classificação heurística</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Link
+              href="/sobre"
+              className="text-[10px] uppercase tracking-[0.14em] text-faint transition hover:text-ink"
+            >
+              Sobre
+            </Link>
+            <a
+              href="https://github.com/victorcapile/osint-brasil"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] uppercase tracking-[0.14em] text-faint transition hover:text-ink"
+            >
+              GitHub
+            </a>
+          </div>
         </div>
       </footer>
     </div>
