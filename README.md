@@ -51,7 +51,7 @@ recrie o banco; o schema é recriado na próxima consulta.
 
 ## Deploy
 
-- Repositório: <https://github.com/victorcapile/osintbrasil>
+- Repositório: <https://github.com/victorcapile/osint-brasil>
 - Vercel: projeto `osintbrasil` (conta `victor-8268`)
 - Banco: **Neon** via Vercel Marketplace (`DATABASE_URL` em Production/Preview/Development)
 - URL: <https://osintbrasil.vercel.app>
@@ -60,8 +60,8 @@ recrie o banco; o schema é recriado na próxima consulta.
 vercel --prod
 ```
 
-O deploy por CLI funciona sem a integração GitHub. Para deploy automático a cada push, conecte
-o repositório ao projeto no painel do Vercel (a GitHub App precisa de acesso ao repo privado).
+O repositório está conectado ao projeto na Vercel: pushes em `main` disparam deploy automático.
+O deploy manual também funciona com `vercel --prod`.
 
 ---
 
